@@ -1,0 +1,33 @@
+# Environment & Secrets
+.env
+.venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+
+# Data & Large Files (Raw CSVs and zips)
+data/raw/**/*.csv
+data/raw/*.csv
+data/raw/*.zip
+data/processed/*.csv
+data/processed/*.npz
+data/processed/*.parquet
+!data/.gitkeep
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# Checkpoints & Large Model Artifacts
+*.tar.gz
+*.pt
+*.pth
+*.onnx
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints/
+
+# OS Specific
+.DS_Store
+Thumbs.db

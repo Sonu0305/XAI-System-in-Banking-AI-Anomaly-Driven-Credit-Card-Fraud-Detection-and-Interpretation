@@ -1,0 +1,93 @@
+[
+  {
+    "Model":"XGBoost",
+    "AUPRC":0.8245,
+    "ROC-AUC":0.9718,
+    "F1-Score":0.8276,
+    "F2-Score":0.8174,
+    "Precision":0.8451,
+    "Recall":0.8108,
+    "MCC":0.8275,
+    "FPR":0.000258,
+    "Optimal Threshold":0.434,
+    "Total Loss ($)":7110.0
+  },
+  {
+    "Model":"Supervised Deep Tabular",
+    "AUPRC":0.6576,
+    "ROC-AUC":0.9165,
+    "F1-Score":0.7436,
+    "F2-Score":0.7672,
+    "Precision":0.7073,
+    "Recall":0.7838,
+    "MCC":0.7441,
+    "FPR":0.000563,
+    "Optimal Threshold":0.182,
+    "Total Loss ($)":8240.0
+  },
+  {
+    "Model":"Logistic Regression",
+    "AUPRC":0.6463,
+    "ROC-AUC":0.9639,
+    "F1-Score":0.6425,
+    "F2-Score":0.747,
+    "Precision":0.521,
+    "Recall":0.8378,
+    "MCC":0.66,
+    "FPR":0.001337,
+    "Optimal Threshold":0.99,
+    "Total Loss ($)":6570.0
+  },
+  {
+    "Model":"Hybrid (Anomaly + Deep DL)",
+    "AUPRC":0.5949,
+    "ROC-AUC":0.9213,
+    "F1-Score":0.7226,
+    "F2-Score":0.7427,
+    "Precision":0.6914,
+    "Recall":0.7568,
+    "MCC":0.7228,
+    "FPR":0.000586,
+    "Optimal Threshold":0.36,
+    "Total Loss ($)":9250.0
+  },
+  {
+    "Model":"LightGBM",
+    "AUPRC":0.4551,
+    "ROC-AUC":0.9314,
+    "F1-Score":0.5438,
+    "F2-Score":0.672,
+    "Precision":0.4126,
+    "Recall":0.7973,
+    "MCC":0.5726,
+    "FPR":0.00197,
+    "Optimal Threshold":0.99,
+    "Total Loss ($)":8340.0
+  },
+  {
+    "Model":"Autoencoder (Alone)",
+    "AUPRC":0.1911,
+    "ROC-AUC":0.9493,
+    "F1-Score":0.2378,
+    "F2-Score":0.3917,
+    "Precision":0.1437,
+    "Recall":0.6892,
+    "MCC":0.3124,
+    "FPR":0.007128,
+    "Optimal Threshold":0.015,
+    "Total Loss ($)":14540.0
+  },
+  {
+    "Model":"Isolation Forest",
+    "AUPRC":0.1033,
+    "ROC-AUC":0.9407,
+    "F1-Score":0.2308,
+    "F2-Score":0.2791,
+    "Precision":0.1791,
+    "Recall":0.3243,
+    "MCC":0.2393,
+    "FPR":0.002579,
+    "Optimal Threshold":0.709,
+    "Total Loss ($)":26100.0
+  }
+]

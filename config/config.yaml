@@ -1,0 +1,107 @@
+# Project Configuration
+project:
+  name: "XAI-System-Credit-Card-Fraud-Detection"
+  version: "1.0.0"
+  seed: 42
+  device: "auto"  # 'auto', 'cuda', or 'cpu'
+  use_amp: true   # Automatic Mixed Precision for GPU
+  num_workers: 4
+
+# Dataset Settings
+data:
+  primary_dataset: "mlg-ulb/creditcardfraud"
+  raw_file: "data/raw/creditcard.csv"
+  processed_dir: "data/processed"
+  test_size: 0.15
+  val_size: 0.15
+  stratify: true
+  time_feature: "Time"
+  amount_feature: "Amount"
+  target_column: "Class"
+  scaling: "robust"  # robust, standard, minmax
+  # Imbalance handling
+  imbalance_method: "focal_weighting"  # 'focal_weighting', 'smote', 'class_weights'
+
+# Unsupervised Anomaly Detection Model (Autoencoder)
+anomaly_model:
+  type: "DeepAutoencoder"
+  encoder_dims: [64, 32, 16]
+  latent_dim: 8
+  dropout: 0.1
+  learning_rate: 0.001
+  weight_decay: 0.00001
+  batch_size: 512
+  epochs: 25
+  early_stopping_patience: 5
+  threshold_percentile: 98.0
+  save_path: "results/models/autoencoder.pt"
+
+# Supervised Deep Learning Model (Tabular Deep MLP / ResNet)
+supervised_model:
+  type: "DeepFraudClassifier"
+  hidden_dims: [128, 64, 32]
+  dropout: 0.25
+  batch_norm: true
+  activation: "gelu"
+  learning_rate: 0.0008
+  weight_decay: 0.0001
+  batch_size: 512
+  epochs: 30
+  early_stopping_patience: 6
+  focal_loss:
+    enabled: true
+    gamma: 2.0
+    alpha: 0.25
+  save_path: "results/models/supervised_deep.pt"
+
+# Hybrid Pipeline: Anomaly Augmentation + Deep Classifier
+hybrid_model:
+  augment_with_latent: true
+  augment_with_recon_error: true
+  hidden_dims: [160, 80, 40]
+  dropout: 0.25
+  learning_rate: 0.0008
+  batch_size: 512
+  epochs: 30
+  early_stopping_patience: 6
+  save_path: "results/models/hybrid_deep.pt"
+
+# Baseline Models
+baselines:
+  xgboost:
+    n_estimators: 250
+    max_depth: 5
+    learning_rate: 0.05
+    subsample: 0.8
+    colsample_bytree: 0.8
+    eval_metric: "aucpr"
+  lightgbm:
+    n_estimators: 250
+    max_depth: 6
+    num_leaves: 31
+    learning_rate: 0.05
+  isolation_forest:
+    n_estimators: 150
+    contamination: 0.0017
+    random_state: 42
+  logistic_regression:
+    max_iter: 1000
+    class_weight: "balanced"
+
+# Explainable AI (XAI)
+xai:
+  background_samples: 150
+  explain_samples: 50
+  shap_nsamples: 100
+  lime_num_features: 10
+  top_k_features: 10
+  save_plots: true
+  output_dir: "results/explanations"
+
+# Financial Evaluation Metrics
+evaluation:
+  cost_false_positive: 10.0  # $10 cost to investigate a false alert
+  cost_false_negative: 500.0 # $500 estimated average chargeback/fraud loss
+  optimal_threshold_metric: "f2" # 'f1', 'f2', or 'cost'
+  results_dir: "results"
+

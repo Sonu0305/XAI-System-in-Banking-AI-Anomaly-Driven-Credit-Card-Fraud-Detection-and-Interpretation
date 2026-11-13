@@ -1,0 +1,37 @@
+# Core Deep Learning & Tensor Operations
+torch>=2.2.0
+torchvision>=0.17.0
+
+# Scientific Computing & Data Manipulation
+numpy>=1.24.0
+scipy>=1.11.0
+pandas>=2.0.0
+
+# Traditional ML & Imbalance Handling
+scikit-learn>=1.3.0
+imbalanced-learn>=0.12.0
+
+# Gradient Boosted Trees Baselines
+xgboost>=2.0.0
+lightgbm>=4.0.0
+catboost>=1.2.0
+
+# Explainable AI (XAI)
+shap>=0.44.0
+lime>=0.2.0
+
+# Visualization & Reporting
+matplotlib>=3.8.0
+seaborn>=0.13.0
+tabulate>=0.9.0
+
+# Configuration & Utilities
+pyyaml>=6.0
+python-dotenv>=1.0.0
+kaggle>=1.6.0
+six>=1.16.0
+tqdm>=4.66.0
+
+# Testing & Quality
+pytest>=7.4.0
+
