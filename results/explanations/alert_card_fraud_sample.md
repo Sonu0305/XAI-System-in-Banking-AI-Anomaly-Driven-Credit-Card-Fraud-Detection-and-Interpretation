@@ -6,7 +6,7 @@
 ### Executive Summary
 - **Fraud Risk Verdict:** `CRITICAL RISK`
 - **Estimated Fraud Probability:** **`99.28%`**
-- **Unsupervised Anomaly State:** ⚠️ ANOMALOUS (High Reconstruction Error) (Reconstruction MSE: `3.86115` vs Threshold: `2.60543`)
+- **Unsupervised Anomaly State:** ⚠️ ANOMALOUS (High Reconstruction Error) (Reconstruction MSE: `3.50708` vs Threshold: `1.50490`)
 
 ---
 ### Root Cause Analysis (XAI Feature Attribution)
@@ -27,5 +27,5 @@
 
 ### Regulatory & Compliance Audit Trail
 ```text
-Transaction evaluated by XAI Hybrid Banking Pipeline. Supervised fraud probability: 99.28%. Autoencoder reconstruction residual is 1.48x of the normal transaction boundary. Key risk drivers identified via SHAP Shapley values.
+Transaction evaluated by XAI Hybrid Banking Pipeline. Supervised fraud probability: 99.28%. Autoencoder reconstruction residual is 2.33x of the normal transaction boundary. Key risk drivers identified via SHAP Shapley values.
 ```

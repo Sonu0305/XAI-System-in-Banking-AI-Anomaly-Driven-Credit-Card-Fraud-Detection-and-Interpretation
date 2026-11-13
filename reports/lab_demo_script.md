@@ -131,3 +131,4 @@ cat results/explanations/alert_card_fraud_sample.md
 ### Q4: How is this system optimized for Kaggle GPU T4 x2?
 **Answer:**  
 *"Our `device.py` detects multiple GPUs via `torch.cuda.device_count() >= 2` and wraps models in `nn.DataParallel`. We utilize PyTorch Automatic Mixed Precision (`torch.amp.autocast('cuda')`), DataLoader pinned memory (`pin_memory=True`), and asynchronous worker prefetching (`num_workers=4`), doubling throughput and keeping VRAM utilization optimized."*
+

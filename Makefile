@@ -50,3 +50,4 @@ all: test train evaluate report notebooks pdf
 
 clean:
 	rm -rf __pycache__ src/**/__pycache__ tests/__pycache__ .pytest_cache
+
