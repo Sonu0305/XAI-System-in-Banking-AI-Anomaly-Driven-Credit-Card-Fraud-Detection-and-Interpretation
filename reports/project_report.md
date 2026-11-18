@@ -207,8 +207,6 @@ The Hybrid model successfully detects $61$ out of $74$ fraud events ($82.43\%$ r
 \textbf{Key Empirical Takeaway:} Fusing unsupervised manifold latents ($z \in \mathbb{R}^8$) and reconstruction residuals ($e \in \mathbb{R}^1$) with supervised tabular representations delivers a $+3.05\%$ AUPRC improvement over tuned XGBoost, while cutting false positives by $9.3\%$.
 \end{takeawaybox}
 
-\clearpage
-
 # 5. Explainable AI (XAI) Analysis
 
 Financial institutions operating in Europe (GDPR) and North America (FCRA) must provide cardholders with Adverse Action rationales and maintain internal audit trails. Our system provides both population-level (global) and transaction-level (local) explainability.
@@ -220,6 +218,8 @@ Computing Shapley values across the test population reveals that features **`V14
 - Negative values of `V14` and `V10` exert severe positive pressure on the fraud probability.
 - Elevated values of `V4` indicate heightened anomaly associated with automated card testing.
 - Directional impact is confirmed via SHAP beeswarm and partial dependence plots, demonstrating sharp non-linear risk transitions when $V14 < -3.5$.
+
+\clearpage
 
 \begin{figure}[htbp]
 \centering
@@ -243,17 +243,17 @@ Figure \ref{fig:shap_dependence} illustrates the non-linear risk transitions unc
 \centering
 \begin{minipage}{0.32\textwidth}
   \centering
-  \includegraphics[width=\linewidth]{results/explanations/shap_dependence_v14.png}
+  \includegraphics[width=\linewidth,height=4.4cm,keepaspectratio]{results/explanations/shap_dependence_v14.png}
   \caption*{(a) $V_{14}$ Partial Dependence}
 \end{minipage}\hfill
 \begin{minipage}{0.32\textwidth}
   \centering
-  \includegraphics[width=\linewidth]{results/explanations/shap_dependence_v10.png}
+  \includegraphics[width=\linewidth,height=4.4cm,keepaspectratio]{results/explanations/shap_dependence_v10.png}
   \caption*{(b) $V_{10}$ Partial Dependence}
 \end{minipage}\hfill
 \begin{minipage}{0.32\textwidth}
   \centering
-  \includegraphics[width=\linewidth]{results/explanations/shap_dependence_v4.png}
+  \includegraphics[width=\linewidth,height=4.4cm,keepaspectratio]{results/explanations/shap_dependence_v4.png}
   \caption*{(c) $V_4$ Partial Dependence}
 \end{minipage}
 \caption{SHAP Partial Dependence plots highlighting non-linear risk transitions for the top three critical risk features.}
@@ -342,6 +342,8 @@ The codebase is engineered for dual NVIDIA T4 GPU environments on Kaggle:
 - **Automatic Mixed Precision (AMP):** Employs `torch.amp.autocast('cuda')` during forward passes, halving memory bandwidth overhead and doubling tensor core throughput.
 - **DataLoader Efficiency:** Uses pinned memory (`pin_memory=True`) and multi-process asynchronous workers (`num_workers=4`) to eliminate CPU-to-GPU memory transfer bottlenecks.
 - **Graceful Fallback:** If executed locally without CUDA, the pipeline dynamically adapts to multi-threaded CPU execution.
+
+\clearpage
 
 # 7. Ethical Considerations, Limitations & Future Work
 
