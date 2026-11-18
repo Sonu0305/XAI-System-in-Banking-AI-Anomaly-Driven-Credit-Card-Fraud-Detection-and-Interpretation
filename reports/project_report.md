@@ -121,6 +121,8 @@ In commercial banking, classification errors carry asymmetric financial implicat
 $$\text{Total Financial Cost} = \text{FP} \times C_{\text{FP}} + \text{FN} \times C_{\text{FN}}$$
 Where $C_{\text{FP}} = \$10$ represents fraud operations analyst verification overhead, and $C_{\text{FN}} = \$500$ represents average direct chargeback fraud loss. The operational threshold $\tau^*$ is calibrated to minimize this monetary loss or maximize the $F_2$-score (weighting recall twice as heavily as precision).
 
+\clearpage
+
 # 4. Experimental Results & Comparative Evaluation
 
 All models were evaluated on the held-out test partition ($42,722$ transactions, $74$ positive fraud cases).
@@ -205,6 +207,8 @@ The Hybrid model successfully detects $61$ out of $74$ fraud events ($82.43\%$ r
 \textbf{Key Empirical Takeaway:} Fusing unsupervised manifold latents ($z \in \mathbb{R}^8$) and reconstruction residuals ($e \in \mathbb{R}^1$) with supervised tabular representations delivers a $+3.05\%$ AUPRC improvement over tuned XGBoost, while cutting false positives by $9.3\%$.
 \end{takeawaybox}
 
+\clearpage
+
 # 5. Explainable AI (XAI) Analysis
 
 Financial institutions operating in Europe (GDPR) and North America (FCRA) must provide cardholders with Adverse Action rationales and maintain internal audit trails. Our system provides both population-level (global) and transaction-level (local) explainability.
@@ -256,6 +260,8 @@ Figure \ref{fig:shap_dependence} illustrates the non-linear risk transitions unc
 \label{fig:shap_dependence}
 \end{figure}
 
+\clearpage
+
 ### 5.2 Local Case-Level Explanations (SHAP Waterfall & LIME)
 
 For every alerted transaction, the system computes local additive attributions and linear surrogate rules:
@@ -279,7 +285,7 @@ For every alerted transaction, the system computes local additive attributions a
 \label{fig:local_xai}
 \end{figure}
 
-\newpage
+\clearpage
 
 ### 5.3 Automated Bank Security Operations Alert Cards
 
