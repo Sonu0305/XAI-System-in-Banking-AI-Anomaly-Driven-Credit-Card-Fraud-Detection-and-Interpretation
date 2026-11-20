@@ -425,6 +425,7 @@ This repository provides an exhaustive documentation package suitable for execut
 
 | Deliverable Artifact | File Path | Description |
 |:---|:---|:---|
+| 📓 **1. Google Colab File (Complete Code & Outputs)** | [`1_Google_Colab_Credit_Card_Fraud_Detection_and_Interpretation.ipynb`](1_Google_Colab_Credit_Card_Fraud_Detection_and_Interpretation.ipynb) | **Primary Submission Deliverable #1:** Master self-contained executable Google Colab notebook with complete code, pipeline execution, rich visualizations, benchmark outputs, SHAP/LIME explainability, and Bank SecOps Alert Cards. |
 | 📄 **Academic Project Report (PDF)** | [`reports/project_report.pdf`](reports/project_report.pdf) | Formal 10-page conference-style paper with LaTeX formatting, theoretical proofs, mathematical derivations, and bibliography. |
 | 📝 **Project Report Source (Markdown)** | [`reports/project_report.md`](reports/project_report.md) | Full Markdown source of the academic paper including preamble and vector diagrams. |
 | 📊 **Executive Presentation Deck (.pptx)** | [`reports/presentation.pptx`](reports/presentation.pptx) | Professional 16:9 widescreen PowerPoint deck with Institutional Banking theme, card layouts, and speaker notes. |
@@ -439,6 +440,7 @@ This repository provides an exhaustive documentation package suitable for execut
 
 ```text
 XAI-System-in-Banking-AI-Anomaly-Driven-Credit-Card-Fraud-Detection-and-Interpretation/
+├── 1_Google_Colab_Credit_Card_Fraud_Detection_and_Interpretation.ipynb  # Primary Deliverable 1: Complete code & execution
 ├── .env.example                     # Environment template for Kaggle API credentials
 ├── README.md                        # Master repository documentation (You are here)
 ├── requirements.txt                 # Pinned Python package dependencies

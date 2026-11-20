@@ -1,6 +1,6 @@
 """
-Generator for all 5 project Jupyter notebooks.
-Builds clean, fully structured, publication-quality .ipynb files:
+Generator and Executor for all 5 project Jupyter notebooks.
+Builds clean, fully structured, publication-quality .ipynb files with complete execution outputs:
 01_eda.ipynb
 02_anomaly_detection.ipynb
 03_supervised_training.ipynb
@@ -8,12 +8,16 @@ Builds clean, fully structured, publication-quality .ipynb files:
 05_end_to_end_demo.ipynb
 """
 
-import json
+import sys
+import time
 from pathlib import Path
 import nbformat as nbf
+from nbclient import NotebookClient
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
 
 
-def make_notebook(cells, filepath: Path):
+def make_notebook(cells, filepath: Path, execute: bool = True):
     nb = nbf.v4.new_notebook()
     nb["cells"] = cells
     nb["metadata"] = {
@@ -34,11 +38,21 @@ def make_notebook(cells, filepath: Path):
     }
     with open(filepath, "w", encoding="utf-8") as f:
         nbf.write(nb, f)
-    print(f"[SUCCESS] Created notebook: {filepath}")
+    print(f"[CREATED] Notebook template: {filepath}")
+
+    if execute:
+        print(f"[EXECUTING] Running cells for {filepath.name}...")
+        client = NotebookClient(nb, timeout=300, kernel_name="python3", resources={"metadata": {"path": str(filepath.parent)}})
+        t0 = time.time()
+        client.execute()
+        print(f"[SUCCESS] Executed {filepath.name} in {time.time() - t0:.2f}s!")
+        with open(filepath, "w", encoding="utf-8") as f:
+            nbf.write(nb, f)
+        print(f"[SAVED] Executed notebook: {filepath} ({filepath.stat().st_size / 1024:.1f} KB)")
 
 
-def build_all_notebooks(notebooks_dir: str = "notebooks"):
-    nb_dir = Path(notebooks_dir)
+def build_all_notebooks(notebooks_dir: str = "notebooks", execute: bool = True):
+    nb_dir = ROOT_DIR / notebooks_dir
     nb_dir.mkdir(parents=True, exist_ok=True)
 
     # -------------------------------------------------------------
@@ -56,11 +70,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Add repo root to path
 ROOT_DIR = Path.cwd().parent if Path.cwd().name == "notebooks" else Path.cwd()
 sys.path.insert(0, str(ROOT_DIR))
 
-# Style settings
 plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
 plt.rcParams["figure.dpi"] = 120
 print(f"Working directory: {ROOT_DIR}")"""),
@@ -108,91 +120,90 @@ print("Legitimate:", df[df["Class"] == 0]["Amount"].describe())
 print("\\nFraudulent:", df[df["Class"] == 1]["Amount"].describe())
 
 fig, axes = plt.subplots(1, 2, figsize=(12, 4))
-sns.histplot(df[df["Class"] == 0]["Amount"], bins=50, kde=True, color="#2b5c8f", ax=axes[0])
-axes[0].set_title("Legitimate Amount Distribution ($)", fontsize=11, fontweight="bold")
-axes[0].set_xlim([0, 1500])
+sns.histplot(df[df["Class"] == 0]["Amount"], bins=50, ax=axes[0], color="#2b5c8f", kde=True)
+axes[0].set_title("Legitimate Amount Distribution (Capped at 99th Pct)")
+axes[0].set_xlim(0, df[df["Class"] == 0]["Amount"].quantile(0.99))
 
-sns.histplot(df[df["Class"] == 1]["Amount"], bins=50, kde=True, color="#d9534f", ax=axes[1])
-axes[1].set_title("Fraudulent Amount Distribution ($)", fontsize=11, fontweight="bold")
-axes[1].set_xlim([0, 1500])
-plt.tight_layout()
-plt.show()"""),
-
-        nbf.v4.new_markdown_cell("""## 4. Temporal Dynamics over 48 Hours
-The `Time` feature records elapsed seconds from the first recorded transaction over 48 hours. By extracting the hour of the day (`(Time // 3600) % 24`), we observe distinct circadian patterns in fraudulent activity."""),
-
-        nbf.v4.new_code_cell("""df["Hour"] = (df["Time"] // 3600) % 24
-
-plt.figure(figsize=(10, 4))
-sns.kdeplot(df[df["Class"] == 0]["Hour"], label="Legitimate", color="#2b5c8f", lw=2)
-sns.kdeplot(df[df["Class"] == 1]["Hour"], label="Fraud", color="#d9534f", lw=2)
-plt.title("Diurnal Transaction Density: Legitimate vs Fraud (Hour of Day)", fontsize=12, fontweight="bold")
-plt.xlabel("Hour of Day (0 - 23)")
-plt.ylabel("Density")
-plt.legend()
-plt.tight_layout()
-plt.show()"""),
-
-        nbf.v4.new_markdown_cell("""## 5. PCA Component Correlation Matrix
-Features `V1` through `V28` are orthogonal PCA components resulting from confidential dimensionality reduction. We inspect correlations with the target class."""),
-
-        nbf.v4.new_code_cell("""corr = df.corr()["Class"].drop(["Class", "Hour"]).sort_values()
-
-plt.figure(figsize=(10, 5))
-colors = ["#d9534f" if v < -0.15 or v > 0.15 else "#4a90e2" for v in corr.values]
-corr.plot(kind="bar", color=colors)
-plt.title("Feature Correlation with Fraud Label ('Class')", fontsize=12, fontweight="bold")
-plt.ylabel("Pearson Correlation Coefficient")
-plt.axhline(0, color="black", linestyle="--", alpha=0.5)
+sns.histplot(df[df["Class"] == 1]["Amount"], bins=50, ax=axes[1], color="#d9534f", kde=True)
+axes[1].set_title("Fraudulent Amount Distribution")
 plt.tight_layout()
 plt.show()
 
-print("Top 5 Negative Correlations (Lower value -> Higher Fraud Risk):")
-print(corr.head(5))
-print("\\nTop 5 Positive Correlations (Higher value -> Higher Fraud Risk):")
-print(corr.tail(5)[::-1])""")
+# Log amount transform
+df["Amount_Log"] = np.log1p(df["Amount"])
+fig, ax = plt.subplots(figsize=(7, 4))
+sns.kdeplot(data=df, x="Amount_Log", hue="Class", common_norm=False, palette=["#2b5c8f", "#d9534f"], fill=True, ax=ax)
+ax.set_title("Log-Transformed Transaction Amount Density")
+plt.tight_layout()
+plt.show()"""),
+
+        nbf.v4.new_markdown_cell("""## 4. Time-Domain Periodicity & Hourly Cyclic Encoding
+Transactions span 48 consecutive hours. Legitimate activity follows diurnal cycles, whereas automated bot attacks frequently strike during off-peak night hours."""),
+
+        nbf.v4.new_code_cell("""df["Hour"] = (df["Time"] // 3600) % 24
+fig, ax = plt.subplots(figsize=(10, 4))
+sns.histplot(data=df, x="Hour", hue="Class", multiple="dodge", shrink=0.8, bins=24, palette=["#2b5c8f", "#d9534f"], ax=ax)
+ax.set_yscale("log")
+ax.set_title("Transactions by Hour of Day (0–23) on Log Scale")
+plt.tight_layout()
+plt.show()"""),
+
+        nbf.v4.new_markdown_cell("""## 5. PCA Feature Correlation Spectrum with Fraud Label
+We evaluate which anonymized features exhibit strongest correlation with `Class`."""),
+
+        nbf.v4.new_code_cell("""correlations = df.corr()["Class"].drop(["Class", "Amount_Log"]).sort_values()
+top_neg = correlations.head(5)
+top_pos = correlations.tail(5)
+top_corr = pd.concat([top_neg, top_pos])
+
+fig, ax = plt.subplots(figsize=(10, 4))
+colors = ["#2b5c8f" if c < 0 else "#d9534f" for c in top_corr.values]
+ax.bar(top_corr.index, top_corr.values, color=colors)
+ax.set_title("Top 10 Positively & Negatively Correlated Features with Class")
+ax.set_ylabel("Pearson Correlation")
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()""")
     ]
-    make_notebook(nb1_cells, nb_dir / "01_eda.ipynb")
+    make_notebook(nb1_cells, nb_dir / "01_eda.ipynb", execute=execute)
 
     # -------------------------------------------------------------
     # 02_anomaly_detection.ipynb
     # -------------------------------------------------------------
     nb2_cells = [
-        nbf.v4.new_markdown_cell("""# 🔍 02. Unsupervised Anomaly Detection via Deep Autoencoder
+        nbf.v4.new_markdown_cell("""# 🔍 02. Unsupervised Anomaly Detection: Deep Autoencoder
 ### Project: XAI System in Banking: AI Anomaly-Driven Credit Card Fraud Detection and Interpretation
-**Objective:** Train an unsupervised Deep Autoencoder strictly on legitimate transactions ($y=0$) to model the normal banking behavior manifold. Transactions with high reconstruction errors are flagged as anomalies."""),
+**Objective:** Train an unsupervised Deep Autoencoder strictly on legitimate banking transactions to learn normal manifold dynamics, compute reconstruction error residuals, and establish dynamic anomaly thresholds."""),
 
         nbf.v4.new_code_cell("""import os, sys
 from pathlib import Path
 import numpy as np
-import torch
+import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import torch
 
 ROOT_DIR = Path.cwd().parent if Path.cwd().name == "notebooks" else Path.cwd()
 sys.path.insert(0, str(ROOT_DIR))
 
 from src.data.preprocessing import DataPipeline
 from src.models.autoencoder import DeepAutoencoder
-from src.training.autoencoder_trainer import AutoencoderTrainer
 from src.utils.device import get_device
 
 device = get_device("auto")
-print(f"Execution Device: {device}")"""),
+print(f"Device: {device}")"""),
 
-        nbf.v4.new_markdown_cell("""## 1. Load Processed Dataset
-We load the preprocessed splits, noting that $X_{\\text{train\\_normal}}$ contains only class 0 transactions."""),
+        nbf.v4.new_markdown_cell("""## 1. Load Preprocessed Zero-Leakage Dataset splits"""),
 
         nbf.v4.new_code_cell("""pipeline = DataPipeline(processed_dir=str(ROOT_DIR / "data/processed"))
 data = pipeline.load_processed()
+
 input_dim = data.X_train.shape[1]
 print(f"Features: {input_dim}")
 print(f"Normal training samples: {len(data.X_train_normal):,}")
-print(f"Validation samples: {len(data.X_val):,} (Frauds: {np.sum(data.y_val == 1)})")
-print(f"Test samples: {len(data.X_test):,} (Frauds: {np.sum(data.y_test == 1)})")"""),
+print(f"Test samples: {len(data.X_test):,} (Fraud: {data.y_test.sum():,})")"""),
 
-        nbf.v4.new_markdown_cell("""## 2. Load Trained Deep Autoencoder
-The Autoencoder compresses the 33-dimensional feature space into an 8-dimensional latent bottleneck and reconstructs the original vector."""),
+        nbf.v4.new_markdown_cell("""## 2. Load Production Autoencoder Checkpoint & Calibrated Threshold"""),
 
         nbf.v4.new_code_cell("""model_path = ROOT_DIR / "results/models/autoencoder.pt"
 autoencoder = DeepAutoencoder(input_dim=input_dim, latent_dim=8).to(device)
@@ -201,63 +212,52 @@ if model_path.exists():
     ckpt = torch.load(model_path, map_location=device, weights_only=False)
     state = ckpt["model_state_dict"] if "model_state_dict" in ckpt else ckpt
     autoencoder.load_state_dict(state)
-    threshold = ckpt.get("threshold", 0.015)
+    threshold = ckpt.get("threshold", 1.5048)
     print(f"Loaded trained Autoencoder from {model_path}")
     print(f"Calibrated 98th Percentile Anomaly Threshold: {threshold:.6f}")
 else:
     print("Pretrained checkpoint not found; please execute python scripts/train.py first.")"""),
 
-        nbf.v4.new_markdown_cell("""## 3. Reconstruction Error Separation Analysis
-We evaluate reconstruction errors across normal vs fraudulent transactions in the test set."""),
+        nbf.v4.new_markdown_cell("""## 3. Reconstruction Error Evaluation on Held-out Test Set"""),
 
         nbf.v4.new_code_cell("""autoencoder.eval()
-test_tensor = torch.as_tensor(data.X_test, dtype=torch.float32, device=device)
 with torch.no_grad():
+    test_tensor = torch.as_tensor(data.X_test, dtype=torch.float32, device=device)
     recon_errors = autoencoder.compute_reconstruction_error(test_tensor, reduction="mean").cpu().numpy()
 
 normal_errors = recon_errors[data.y_test == 0]
 fraud_errors = recon_errors[data.y_test == 1]
 
-print(f"Mean Normal Reconstruction MSE: {normal_errors.mean():.6f} (Median: {np.median(normal_errors):.6f})")
-print(f"Mean Fraud Reconstruction MSE:  {fraud_errors.mean():.6f} (Median: {np.median(fraud_errors):.6f})")
-print(f"Separation Ratio: {fraud_errors.mean() / normal_errors.mean():.2f}x higher error on fraud!")
-
-plt.figure(figsize=(10, 5))
-sns.kdeplot(np.log1p(normal_errors), label="Normal Transactions (Class 0)", color="#2b5c8f", lw=2)
-sns.kdeplot(np.log1p(fraud_errors), label="Fraudulent Transactions (Class 1)", color="#d9534f", lw=2)
-if 'threshold' in locals():
-    plt.axvline(np.log1p(threshold), color="black", linestyle="--", label=f"Anomaly Threshold ({threshold:.4f})")
-plt.title("Reconstruction Error Distribution (Log-Scale MSE)", fontsize=12, fontweight="bold")
-plt.xlabel("Log(1 + Reconstruction MSE)")
-plt.ylabel("Density")
-plt.legend()
+fig, ax = plt.subplots(figsize=(8, 4.5))
+sns.kdeplot(np.log1p(normal_errors), label="Normal Transactions (0)", fill=True, color="#2b5c8f", ax=ax)
+sns.kdeplot(np.log1p(fraud_errors), label="Fraudulent Transactions (1)", fill=True, color="#d9534f", ax=ax)
+ax.axvline(np.log1p(threshold), color="red", linestyle="--", linewidth=2, label=f"Threshold (τ = {threshold:.4f})")
+ax.set_title("Autoencoder Reconstruction Error Density (Log Scale)")
+ax.set_xlabel("log(1 + MSE Reconstruction Error)")
+ax.legend()
 plt.tight_layout()
 plt.show()"""),
 
-        nbf.v4.new_markdown_cell("""## 4. Latent Space Representation (Bottleneck Projection)
-We extract the 8-dimensional bottleneck latents $z$ and project them to 2D using PCA to visualize manifold clustering."""),
+        nbf.v4.new_markdown_cell("""## 4. Latent Space Representation Visualization (t-SNE / PCA Projection)"""),
 
         nbf.v4.new_code_cell("""from sklearn.decomposition import PCA
 
 with torch.no_grad():
-    _, z_test = autoencoder(test_tensor[:2000])
-    z_np = z_test.cpu().numpy()
-    y_sub = data.y_test[:2000]
+    latent_z = autoencoder.encode(test_tensor).cpu().numpy()
 
 pca = PCA(n_components=2)
-z_2d = pca.fit_transform(z_np)
+z_2d = pca.fit_transform(latent_z)
 
-plt.figure(figsize=(8, 6))
-plt.scatter(z_2d[y_sub == 0, 0], z_2d[y_sub == 0, 1], c="#2b5c8f", alpha=0.3, s=15, label="Legitimate")
-plt.scatter(z_2d[y_sub == 1, 0], z_2d[y_sub == 1, 1], c="#d9534f", alpha=0.9, s=40, edgecolors="k", label="Fraud")
-plt.title("Autoencoder Latent Manifold Projection (First 2 PCA Components)", fontsize=12, fontweight="bold")
-plt.xlabel(f"PC1 ({pca.explained_variance_ratio_[0]*100:.1f}% var)")
-plt.ylabel(f"PC2 ({pca.explained_variance_ratio_[1]*100:.1f}% var)")
-plt.legend()
+fig, ax = plt.subplots(figsize=(7, 5))
+norm_mask = (data.y_test == 0)
+ax.scatter(z_2d[norm_mask, 0][:3000], z_2d[norm_mask, 1][:3000], c="#2b5c8f", alpha=0.3, s=10, label="Normal")
+ax.scatter(z_2d[~norm_mask, 0], z_2d[~norm_mask, 1], c="#d9534f", alpha=0.9, s=25, label="Fraud")
+ax.set_title("2D PCA Projection of Autoencoder Latent Space (Z ∈ ℝ⁸)")
+ax.legend()
 plt.tight_layout()
 plt.show()""")
     ]
-    make_notebook(nb2_cells, nb_dir / "02_anomaly_detection.ipynb")
+    make_notebook(nb2_cells, nb_dir / "02_anomaly_detection.ipynb", execute=execute)
 
     # -------------------------------------------------------------
     # 03_supervised_training.ipynb
@@ -272,7 +272,9 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 import joblib, torch
+from IPython.display import Image, display
 
 ROOT_DIR = Path.cwd().parent if Path.cwd().name == "notebooks" else Path.cwd()
 sys.path.insert(0, str(ROOT_DIR))
@@ -297,8 +299,8 @@ summary_path = ROOT_DIR / "results/tables/model_comparison.csv"
 if summary_path.exists():
     df_results = pd.read_csv(summary_path)
     print("Trained Benchmark Results on Unseen Test Set:")
-    display = df_results[["Model", "AUPRC", "ROC-AUC", "F1-Score", "F2-Score", "Recall", "Precision", "Total Loss ($)"]]
-    print(display.to_string(index=False))
+    df_view = df_results[["Model", "AUPRC", "ROC-AUC", "F1-Score", "F2-Score", "Recall", "Precision", "Total Loss ($)"]]
+    print(df_view.to_string(index=False))
 else:
     print("Model comparison table not found. Run python scripts/evaluate.py to generate benchmarks.")"""),
 
@@ -307,7 +309,6 @@ Precision-Recall curves are the gold standard for severely imbalanced fraud benc
 
         nbf.v4.new_code_cell("""pr_img_path = ROOT_DIR / "results/figures/pr_curves.png"
 if pr_img_path.exists():
-    from IPython.display import Image
     display(Image(filename=str(pr_img_path)))
 else:
     print("PR curve plot not found.")"""),
@@ -326,7 +327,7 @@ We compare the cost incurred by each architecture."""),
     plt.tight_layout()
     plt.show()""")
     ]
-    make_notebook(nb3_cells, nb_dir / "03_supervised_training.ipynb")
+    make_notebook(nb3_cells, nb_dir / "03_supervised_training.ipynb", execute=execute)
 
     # -------------------------------------------------------------
     # 04_xai_explanations.ipynb
@@ -341,6 +342,7 @@ from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 import joblib, shap
+from IPython.display import Image, display
 
 ROOT_DIR = Path.cwd().parent if Path.cwd().name == "notebooks" else Path.cwd()
 sys.path.insert(0, str(ROOT_DIR))
@@ -357,7 +359,6 @@ SHAP Shapley values compute the marginal contribution of each transaction featur
         nbf.v4.new_code_cell("""bar_path = ROOT_DIR / "results/explanations/shap_summary_bar.png"
 bee_path = ROOT_DIR / "results/explanations/shap_beeswarm.png"
 
-from IPython.display import Image
 if bar_path.exists():
     display(Image(filename=str(bar_path)))
 if bee_path.exists():
@@ -393,7 +394,7 @@ for p in lime_imgs[:2]:
     print(f"LIME Plot: {p.name}")
     display(Image(filename=str(p)))""")
     ]
-    make_notebook(nb4_cells, nb_dir / "04_xai_explanations.ipynb")
+    make_notebook(nb4_cells, nb_dir / "04_xai_explanations.ipynb", execute=execute)
 
     # -------------------------------------------------------------
     # 05_end_to_end_demo.ipynb
@@ -407,7 +408,8 @@ for p in lime_imgs[:2]:
 from pathlib import Path
 import numpy as np
 import pandas as pd
-import joblib, torch
+import joblib, torch, shap
+from IPython.display import Markdown, display
 
 ROOT_DIR = Path.cwd().parent if Path.cwd().name == "notebooks" else Path.cwd()
 sys.path.insert(0, str(ROOT_DIR))
@@ -430,8 +432,9 @@ ae_ckpt = torch.load(ROOT_DIR / "results/models/autoencoder.pt", map_location=de
 
 autoencoder = DeepAutoencoder(input_dim=data.X_test.shape[1], latent_dim=8).to(device)
 autoencoder.load_state_dict(ae_ckpt["model_state_dict"] if "model_state_dict" in ae_ckpt else ae_ckpt)
-threshold = ae_ckpt.get("threshold", 0.015)
+threshold = ae_ckpt.get("threshold", 1.5048)
 reporter = BankingAnalystReporter(output_dir=str(ROOT_DIR / "results/explanations"))
+explainer = shap.TreeExplainer(getattr(xgb_model, "model", xgb_model))
 print("All production models successfully initialized.")"""),
 
         nbf.v4.new_markdown_cell("""## 2. Simulate Transaction Processing Stream
@@ -450,8 +453,8 @@ We simulate incoming transaction evaluation:
     # 2. Classifier Probability
     prob = float(xgb_model.predict_proba(x_vector.reshape(1, -1))[0, 1])
     
-    # 3. Simple SHAP attribution placeholder
-    shap_vals = (x_vector * -0.2)
+    # 3. SHAP attribution
+    shap_vals = explainer(x_vector.reshape(1, -1)).values[0]
     
     card = reporter.generate_card(
         transaction_id=txn_id,
@@ -470,18 +473,16 @@ We simulate incoming transaction evaluation:
 
         nbf.v4.new_code_cell("""fraud_idx = np.where(data.y_test == 1)[0][0]
 card_a, md_a = process_transaction("CASE-001-FRAUD", data.X_test[fraud_idx])
-from IPython.display import Markdown
-Markdown(md_a)"""),
+display(Markdown(md_a))"""),
 
         nbf.v4.new_markdown_cell("""## 4. Case Study B: Legitimate Everyday Purchase"""),
 
         nbf.v4.new_code_cell("""normal_idx = np.where(data.y_test == 0)[0][0]
 card_b, md_b = process_transaction("CASE-002-NORMAL", data.X_test[normal_idx])
-Markdown(md_b)""")
+display(Markdown(md_b))""")
     ]
-    make_notebook(nb5_cells, nb_dir / "05_end_to_end_demo.ipynb")
+    make_notebook(nb5_cells, nb_dir / "05_end_to_end_demo.ipynb", execute=execute)
 
 
 if __name__ == "__main__":
-    build_all_notebooks()
-
+    build_all_notebooks(execute=True)

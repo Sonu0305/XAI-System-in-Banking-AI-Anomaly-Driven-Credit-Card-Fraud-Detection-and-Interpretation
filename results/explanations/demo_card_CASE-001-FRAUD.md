@@ -6,20 +6,20 @@
 ### Executive Summary
 - **Fraud Risk Verdict:** `CRITICAL RISK`
 - **Estimated Fraud Probability:** **`99.28%`**
-- **Unsupervised Anomaly State:** ⚠️ ANOMALOUS (High Reconstruction Error) (Reconstruction MSE: `3.86115` vs Threshold: `2.60543`)
+- **Unsupervised Anomaly State:** ⚠️ ANOMALOUS (High Reconstruction Error) (Reconstruction MSE: `3.50708` vs Threshold: `1.50490`)
 
 ---
 ### Root Cause Analysis (XAI Feature Attribution)
 #### 🚨 Primary Red Flags (Driving Risk UP):
-1. **`V17`** (Normalized Value: `-5.216`) → SHAP Impact: `+1.0433`
-2. **`V14`** (Normalized Value: `-4.998`) → SHAP Impact: `+0.9996`
-3. **`V10`** (Normalized Value: `-4.102`) → SHAP Impact: `+0.8204`
-4. **`V5`** (Normalized Value: `-3.035`) → SHAP Impact: `+0.6070`
+1. **`V14`** (Normalized Value: `-4.998`) → SHAP Impact: `+5.7184`
+2. **`V10`** (Normalized Value: `-4.102`) → SHAP Impact: `+1.1060`
+3. **`V16`** (Normalized Value: `-2.991`) → SHAP Impact: `+0.9514`
+4. **`V17`** (Normalized Value: `-5.216`) → SHAP Impact: `+0.9385`
 
 #### 🛡️ Mitigating Factors (Driving Risk DOWN):
-1. **`Amount`** (Normalized Value: `10.809`) → SHAP Impact: `-2.1618`
-2. **`V11`** (Normalized Value: `2.927`) → SHAP Impact: `-0.5854`
-3. **`V27`** (Normalized Value: `2.600`) → SHAP Impact: `-0.5200`
+1. **`V7`** (Normalized Value: `1.318`) → SHAP Impact: `-0.8917`
+2. **`Hour_Cos`** (Normalized Value: `-0.475`) → SHAP Impact: `-0.2988`
+3. **`V18`** (Normalized Value: `-2.212`) → SHAP Impact: `-0.2372`
 
 ---
 ### Recommended Banking Protocol
@@ -27,5 +27,5 @@
 
 ### Regulatory & Compliance Audit Trail
 ```text
-Transaction evaluated by XAI Hybrid Banking Pipeline. Supervised fraud probability: 99.28%. Autoencoder reconstruction residual is 1.48x of the normal transaction boundary. Key risk drivers identified via SHAP Shapley values.
+Transaction evaluated by XAI Hybrid Banking Pipeline. Supervised fraud probability: 99.28%. Autoencoder reconstruction residual is 2.33x of the normal transaction boundary. Key risk drivers identified via SHAP Shapley values.
 ```
